@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -22,3 +23,6 @@ Route::get('posts/users', [UserController::class, 'postsWithUsers']);
 Route::get('posts/by-status/{status}', [PostController::class, 'postsByStatus']);
 Route::get('posts/{id}/user', [UserController::class, 'postWithUser']);
 Route::apiResource('posts', PostController::class);
+
+
+Route::apiResource('categories', CategoryController::class);

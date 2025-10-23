@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::all();
+        $posts = Post::with('user', 'categories:id,name')->paginate(10);
         return response()->json($posts, 200);
     }
 
@@ -27,13 +27,18 @@ class PostController extends Controller
             'title' => 'required|string|max:128',
             'content'=> 'required|string|max:1024',
             'status' => ['sometimes', new Enum(PostStatus::class)],
-            'user_id' => 'required|integer|exists:users,id', // se usa solo para validar si no se protege a ruta
+            'categories' => 'sometimes|array',
+            'categories.*' => 'exists:categories,id',
+            'user_id' => 'required|integer|exists:users,id',
         ]);
 
         $post = Post::create($validated);
 
-        // este se usa solo cuando se protege la ruta y accede un usuario autenticado
-        // $post = $request->user()->posts()->create($validated);
+        if ($request->has('categories')) {
+            $post->categories()->attach($request->input('categories'));
+        }
+
+        $post->load('user', 'categories');
 
         return response()->json($post, 201);
     }
@@ -59,10 +64,20 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|string|min:3|max:128',
             'content'=> 'sometimes|string|min:3|max:1024',
+            'categories' => 'sometimes|array',
+            'categories.*' => 'exists:categories,id',
             'status' => ['sometimes', new Enum(PostStatus::class)],
         ]);
 
-        $post->update($validated);
+        $postData = $request->only(['title', 'content', 'status']);
+
+        $post->update($postData);
+
+        if ($request->has('categories')) {
+            $post->categories()->sync($request->input('categories'));
+        }
+
+        $post->load('categories');
 
         return response()->json($post, 200);
     }
@@ -77,12 +92,12 @@ class PostController extends Controller
     }
 
     public function postWithUser(string $id) {
-        $post = Post::with('user')->findOrFail($id);
+        $post = Post::with('user', 'categories')->findOrFail($id);
         return response()->json($post, 200);
     }
 
     public function postsWithUsers() {
-        $post = Post::with('user')->paginate(10);
+        $post = Post::with('user', 'categories')->paginate(10);
         return response()->json($post, 200);
     }
 
