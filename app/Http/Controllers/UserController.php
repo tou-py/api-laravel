@@ -76,4 +76,14 @@ class UserController extends Controller
         User::findOrFail($id)->delete();
         return response()->noContent();
     }
+
+    public function userWithPosts (string $id) {
+        $user = User::with('posts')->findOrFail($id);
+        return response()->json($user, 200);
+    }
+
+    public function usersWithPosts () {
+        $user = User::with('posts')->paginate(10);
+        return response()->json($user, 200);
+    }
 }

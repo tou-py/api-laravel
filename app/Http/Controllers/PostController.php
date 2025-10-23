@@ -75,4 +75,23 @@ class PostController extends Controller
         Post::findOrFail($id)->delete();
         return response()->noContent();
     }
+
+    public function postWithUser(string $id) {
+        $post = Post::with('user')->findOrFail($id);
+        return response()->json($post, 200);
+    }
+
+    public function postsWithUsers() {
+        $post = Post::with('user')->paginate(10);
+        return response()->json($post, 200);
+    }
+
+    public function postsByStatus(Request $request, string $status) {
+        $request->validate([
+            'status' => [new Enum(PostStatus::class)]
+        ]);
+
+        $posts = Post::where('status', $status)->get();
+        return response()->json($posts, 200);
+    }
 }
