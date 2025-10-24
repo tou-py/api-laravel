@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all()->paginate(10);
+        $users = User::paginate(10);
         return response()->json($users, 200);
     }
 
@@ -24,7 +24,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:128',
-            'email'=> 'required|email|max:128',
+            'email'=> 'required|email|max:128|unique:users,email',
             'password' => 'required|string|min:8'
         ]);
 
@@ -55,7 +55,7 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|min:3|max:128',
-            'email' => 'sometimes|email|min:3|max:128',
+            'email' => 'sometimes|email|min:3|max:128|unique:users,email,'.$id,
             'password' => 'sometimes|min:8'
         ]);
 

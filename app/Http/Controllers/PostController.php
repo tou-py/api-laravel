@@ -29,7 +29,7 @@ class PostController extends Controller
             'status' => ['sometimes', new Enum(PostStatus::class)],
             'categories' => 'sometimes|array',
             'categories.*' => 'exists:categories,id',
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => 'required|integer|exists:users,id', //se puede cambiar por auth()->id() si se protege la ruta
         ]);
 
         $post = Post::create($validated);
@@ -96,17 +96,15 @@ class PostController extends Controller
         return response()->json($post, 200);
     }
 
-    public function postsWithUsers() {
-        $post = Post::with('user', 'categories')->paginate(10);
-        return response()->json($post, 200);
-    }
-
     public function postsByStatus(Request $request, string $status) {
-        $request->validate([
-            'status' => [new Enum(PostStatus::class)]
-        ]);
 
-        $posts = Post::where('status', $status)->get();
+        if (!PostStatus::tryFrom($status)) {
+            return response()->json([
+                'message' => 'El estado proporcionado no es valido'
+            ], 422);
+        }
+
+        $posts = Post::with('user:id,name', 'categories:id,name')->where('status', $status)->get();
         return response()->json($posts, 200);
     }
 }

@@ -19,7 +19,6 @@ Route::get('users/{id}/posts', [UserController::class, 'userWithPosts']);
 Route::apiResource('users', UserController::class);
 
 
-Route::get('posts/users', [UserController::class, 'postsWithUsers']);
 Route::get('posts/by-status/{status}', [PostController::class, 'postsByStatus']);
 Route::get('posts/{id}/user', [UserController::class, 'postWithUser']);
 Route::apiResource('posts', PostController::class);
