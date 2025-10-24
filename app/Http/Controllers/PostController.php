@@ -69,12 +69,10 @@ class PostController extends Controller
             'status' => ['sometimes', new Enum(PostStatus::class)],
         ]);
 
-        $postData = $request->only(['title', 'content', 'status']);
+        $post->update(collect($validated)->except('categories')->toArray());
 
-        $post->update($postData);
-
-        if ($request->has('categories')) {
-            $post->categories()->sync($request->input('categories'));
+        if (isset($validated['categories'])) {
+            $post->categories()->sync($validated['categories']);
         }
 
         $post->load('categories');
